@@ -56,6 +56,7 @@ class CloudPrintRequestor(httplib2.Http):
         rpc_name = path.split('?', 1)[0]
         logging.debug('Calling %s RPC', rpc_name)
         start_time = time.time()
+        response_headers = {}
 
         # force useragent to CCP
         if headers is None:
@@ -74,15 +75,23 @@ class CloudPrintRequestor(httplib2.Http):
                 headers['Content-Length'] = str(len(data))
                 contenttype = 'multipart/form-data;boundary=%s' % boundary
                 headers['Content-Type'] = contenttype
-                headers, response = self.request(
+                response_headers, response = self.request(
                     url, method="POST", body=data, headers=headers)
         else:
             response = testResponse
 
         try:
+            response = response if \
+                isinstance(response, str) \
+                else str(response, 'UTF-8')
             decodedresponse = json.loads(response)
         except ValueError as e:
-            print "ERROR: Failed to decode JSON, value was: " + response
+            print("ERROR: Failed to decode JSON, value was: " + response)
+            print("ERROR: request headers: " + json.dumps(headers))
+            print("ERROR: response headers: " + json.dumps(response_headers))
+            raise e
+        except Exception as e:
+            print("ERROR: Bad response: " + response)
             raise e
 
         logging.debug('%s RPC took %.2f seconds', rpc_name, time.time() - start_time)

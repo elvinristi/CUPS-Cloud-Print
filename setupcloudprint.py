@@ -23,6 +23,7 @@ exit $?
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from pip._vendor.msgpack.fallback import xrange
 
 
 def printPrinters(printers):
@@ -44,7 +45,7 @@ def printPrinters(printers):
     window_size = Utils.GetWindowSize()
     if window_size is None or window_size[0] > len(printer_names):
         for printer_name in printer_names:
-            print printer_name
+            print(printer_name)
     else:
         window_width = window_size[1]
         max_name_length = max((len(printer_name) for printer_name in printer_names))
@@ -56,7 +57,7 @@ def printPrinters(printers):
             row_printers = []
             for printer_name in printer_names[row_i::row_quantity]:
                 row_printers.append(printer_name.ljust(max_name_length))
-            print ' '.join(row_printers)
+            print(' '.join(row_printers))
     return len(printers)
 
 if __name__ == '__main__':  # pragma: no cover
@@ -112,22 +113,22 @@ if __name__ == '__main__':  # pragma: no cover
             data = json.loads(content)
         except Exception:
             # remove old config file
-            print "Deleting old configuration file: " + Auth.config
+            print("Deleting old configuration file: " + Auth.config)
             os.remove(Auth.config)
 
     while True:
         requestors, storage = Auth.SetupAuth(interactive=False)
         if storage is not False:
-            print "You currently have these accounts configured: "
+            print("You currently have these accounts configured: ")
             for requestor in requestors:
-                print requestor.getAccount()
+                print(requestor.getAccount())
             add_account = len(requestors) == 0
         else:
             add_account = True
         if not add_account:
             if not options.interactive:
                 break
-            answer = raw_input("Add more accounts (Y/N)? ")
+            answer = input("Add more accounts (Y/N)? ")
             if answer.lower().startswith("y"):
                 add_account = True
             else:
@@ -142,22 +143,22 @@ if __name__ == '__main__':  # pragma: no cover
         printer_manager = PrinterManager(requestor)
         printers = printer_manager.getPrinters()
         if printers is None:
-            print "Sorry, no printers were found on your Google Cloud Print account."
+            print("Sorry, no printers were found on your Google Cloud Print account.")
             continue
 
         if options.add_all.lower() == "y":
             answer = "y"
         else:
-            answer = raw_input("Add all Google Cloud Print printers from %s to CUPS (Y/N)? " %
+            answer = input("Add all Google Cloud Print printers from %s to CUPS (Y/N)? " %
                                requestor.getAccount())
 
         if not answer.lower().startswith("y"):
             answer = 1
-            print "Not adding printers automatically"
+            print("Not adding printers automatically")
 
             while int(answer) != 0:
                 maxprinterid = printPrinters(printers)
-                answer = raw_input("Add printer (1-%d, 0 to cancel)? " % maxprinterid)
+                answer = input("Add printer (1-%d, 0 to cancel)? " % maxprinterid)
                 try:
                     answer = int(answer)
                 except ValueError:
@@ -165,19 +166,19 @@ if __name__ == '__main__':  # pragma: no cover
                 if answer == 0:
                     continue
                 if answer < 1 or answer > maxprinterid:
-                    print "\nPrinter %d not found\n" % answer
+                    print("\nPrinter %d not found\n" % answer)
                     continue
 
                 ccpprinter = printers[answer - 1]
-                print "Adding " + printers[answer - 1]['displayName']
+                print("Adding " + printers[answer - 1]['displayName'])
                 printername = options.prefix + \
-                    ccpprinter.getDisplayName().encode('ascii', 'replace')
+                    str(ccpprinter.getDisplayName().encode('ascii', 'replace'), 'UTF-8')
                 found = False
                 for cupsprinter in cupsprinters:
                     if cupsprinters[cupsprinter]['device-uri'] == ccpprinter.getURI():
                         found = True
                 if found:
-                    print "\nPrinter with %s already exists\n" % printername
+                    print("\nPrinter with %s already exists\n" % printername)
                 else:
                     printer_manager.addPrinter(printername, ccpprinter)
 
@@ -202,17 +203,17 @@ if __name__ == '__main__':  # pragma: no cover
                         printer_manager.sanitizePrinterName(printername):
                     foundbyname = True
             if foundbyname:
-                answer = raw_input('Printer %s already exists, supply another name (Y/N)? ' %
+                answer = input('Printer %s already exists, supply another name (Y/N)? ' %
                                    printer_manager.sanitizePrinterName(printername))
                 if answer.startswith("Y") or answer.startswith("y"):
-                    printername = raw_input("New printer name? ")
+                    printername = input("New printer name? ")
                 else:
-                    answer = raw_input("Overwrite %s with new printer (Y/N)? " %
+                    answer = input("Overwrite %s with new printer (Y/N)? " %
                                        printer_manager.sanitizePrinterName(printername))
                     if answer.lower().startswith("n"):
                         printername = ""
             elif foundbyname:
-                print "Not adding printer %s, as already exists" % printername
+                print("Not adding printer %s, as already exists" % printername)
                 printername = ""
 
             if printername != "":
@@ -221,9 +222,9 @@ if __name__ == '__main__':  # pragma: no cover
                 addedCount += 1
 
         if addedCount > 0:
-            print "Added %d new printers to CUPS" % addedCount
+            print("Added %d new printers to CUPS" % addedCount)
         else:
-            print "No new printers to add"
+            print("No new printers to add")
 
     printer_uris = []
     printer_manager = PrinterManager(requestors)
@@ -241,16 +242,16 @@ if __name__ == '__main__':  # pragma: no cover
             prunePrinters.append(cupsprinter)
 
     if len(prunePrinters) > 0:
-        print "Found %d printers which no longer exist on cloud print:" % len(prunePrinters)
+        print("Found %d printers which no longer exist on cloud print:" % len(prunePrinters))
         for printer in prunePrinters:
-            print printer
+            print(printer)
         if options.auto_clean.lower() == "y":
             answer = "y"
         else:
-            answer = raw_input("Remove (Y/N)? ")
+            answer = input("Remove (Y/N)? ")
         if answer.lower().startswith("y"):
             for printer in prunePrinters:
                 cupsHelper.deletePrinter(printer)
-                print "Deleted", printer
+                print("Deleted", printer)
         else:
-            print "Not removing old printers"
+            print("Not removing old printers")

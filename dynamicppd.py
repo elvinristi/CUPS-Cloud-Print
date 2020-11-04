@@ -37,7 +37,7 @@ def doList(sys, printer_manager):
         sys.stderr.write("ERROR: No Printers Found\n")
         sys.exit(1)
     for printer in printers:
-        print printer.getCUPSDriverDescription()
+        print(printer.getCUPSDriverDescription())
     sys.exit(0)
 
 
@@ -61,7 +61,7 @@ def doCat():
         sys.stderr.write("ERROR: PPD %s not found\n" % sys.argv[2])
         sys.exit(1)
 
-    print printer.generatePPD()
+    print(printer.generatePPD())
 
     sys.exit(0)
 

@@ -13,30 +13,28 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import urllib
-import mimetools
+import binascii
+import os
 import re
 from auth import Auth
-from urlparse import urlparse
+from urllib.parse import urlparse,unquote
 from printer import Printer
 from cupshelper import CUPSHelper
 from ccputils import Utils
 
 
 class PrinterManager(object):
-    BOUNDARY = mimetools.choose_boundary()
+    BOUNDARY = binascii.hexlify(os.urandom(16)).decode('ascii')
     CRLF = '\r\n'
     requestors = None
     cachedPrinterDetails = {}
-    reservedCapabilityWords = set((
-        'Duplex', 'Resolution', 'Attribute', 'Choice', 'ColorDevice', 'ColorModel', 'ColorProfile',
-        'Copyright', 'CustomMedia', 'Cutter', 'Darkness', 'DriverType', 'FileName', 'Filter',
-        'Filter', 'Finishing', 'Font', 'Group', 'HWMargins', 'InputSlot', 'Installable',
-        'LocAttribute', 'ManualCopies', 'Manufacturer', 'MaxSize', 'MediaSize', 'MediaType',
-        'MinSize', 'ModelName', 'ModelNumber', 'Option', 'PCFileName', 'SimpleColorProfile',
-        'Throughput', 'UIConstraints', 'VariablePaperSize', 'Version', 'Color', 'Background',
-        'Stamp', 'DestinationColorProfile'
-    ))
+    reservedCapabilityWords = {'Duplex', 'Resolution', 'Attribute', 'Choice', 'ColorDevice', 'ColorModel',
+                               'ColorProfile', 'Copyright', 'CustomMedia', 'Cutter', 'Darkness', 'DriverType',
+                               'FileName', 'Filter', 'Filter', 'Finishing', 'Font', 'Group', 'HWMargins', 'InputSlot',
+                               'Installable', 'LocAttribute', 'ManualCopies', 'Manufacturer', 'MaxSize', 'MediaSize',
+                               'MediaType', 'MinSize', 'ModelName', 'ModelNumber', 'Option', 'PCFileName',
+                               'SimpleColorProfile', 'Throughput', 'UIConstraints', 'VariablePaperSize', 'Version',
+                               'Color', 'Background', 'Stamp', 'DestinationColorProfile'}
     URIFormatLatest = 9999
     URIFormat20140308 = 3
     URIFormat20140307 = 2
@@ -120,7 +118,10 @@ class PrinterManager(object):
         Returns:
           string: CUPS-friendly name for the printer
         """
-        return re.sub('[^a-zA-Z0-9\-_]', '', name.encode('ascii', 'replace').replace(' ', '_'))
+        name = name if isinstance(name, str) else str(name)
+        name = str(name.encode('ascii', 'replace'), 'UTF-8').replace(' ', '_')
+
+        return re.sub('[^a-zA-Z0-9\-_]', '', name)
 
     def addPrinter(self, printername, printer, location=None, ppd=None):
         """Adds a printer to CUPS
@@ -155,17 +156,17 @@ class PrinterManager(object):
             result = False
             errorMessage = error
         if result:
-            print "Added " + printername
+            print("Added " + printername)
             return True
         else:
-            print "Error adding: " + printername, errorMessage
+            print("Error adding: " + printername, errorMessage)
             return False
 
     @staticmethod
     def _getAccountNameAndPrinterIdFromURI(uri):
         splituri = uri.rsplit('/', 2)
-        accountName = urllib.unquote(splituri[1])
-        printerId = urllib.unquote(splituri[2])
+        accountName = unquote(splituri[1])
+        printerId = unquote(splituri[2])
         return accountName, printerId
 
     def parseLegacyURI(self, uristring, requestors):
@@ -189,24 +190,24 @@ class PrinterManager(object):
         if uri.scheme == Utils.OLD_PROTOCOL_NAME:
             if len(pathparts) == 2:
                 formatId = PrinterManager.URIFormat20140307
-                printerId = urllib.unquote(pathparts[1])
-                accountName = urllib.unquote(pathparts[0])
-                printerName = urllib.unquote(uri.netloc)
+                printerId = unquote(pathparts[1])
+                accountName = unquote(pathparts[0])
+                printerName = unquote(uri.netloc)
             else:
-                if urllib.unquote(uri.netloc) not in Auth.GetAccountNames(requestors):
+                if unquote(uri.netloc) not in Auth.GetAccountNames(requestors):
                     formatId = PrinterManager.URIFormat20140210
-                    printerName = urllib.unquote(uri.netloc)
-                    accountName = urllib.unquote(pathparts[0])
+                    printerName = unquote(uri.netloc)
+                    accountName = unquote(pathparts[0])
                 else:
                     formatId = PrinterManager.URIFormat20140308
-                    printerId = urllib.unquote(pathparts[0])
+                    printerId = unquote(pathparts[0])
                     printerName = None
-                    accountName = urllib.unquote(uri.netloc)
+                    accountName = unquote(uri.netloc)
         elif uri.scheme == Utils.PROTOCOL_NAME:
             formatId = PrinterManager.URIFormatLatest
-            printerId = urllib.unquote(pathparts[0])
+            printerId = unquote(pathparts[0])
             printerName = None
-            accountName = urllib.unquote(uri.netloc)
+            accountName = unquote(uri.netloc)
 
         return accountName, printerName, printerId, formatId
 
@@ -236,7 +237,7 @@ class PrinterManager(object):
           requestor: Single requestor object for the account
         """
         # find requestor based on account
-        requestor = self.findRequestorForAccount(urllib.unquote(account))
+        requestor = self.findRequestorForAccount(unquote(account))
         if requestor is None:
             return None, None
 

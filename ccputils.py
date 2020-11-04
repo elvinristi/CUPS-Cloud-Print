@@ -105,8 +105,8 @@ class Utils(object):
         """
         p = subprocess.Popen(["file", '-'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         output = p.communicate(filedata)[0]
-        logging.debug("File output was: " + output)
-        return "PDF document" in output
+        logging.debug("File output was: " + str(output))
+        return "PDF document" in str(output)
 
     @staticmethod
     def is_exe(fpath):
@@ -168,7 +168,7 @@ class Utils(object):
     @staticmethod
     def ShowVersion(CCPVersion):
         if len(sys.argv) == 2 and sys.argv[1] == 'version':
-            print "CUPS Cloud Print Version " + CCPVersion
+            print("CUPS Cloud Print Version " + CCPVersion)
             sys.exit(0)
         return False
 
@@ -186,7 +186,7 @@ class Utils(object):
             s = f.read()
             return s
         except IOError as e:
-            print 'ERROR: Error opening %s\n%s', pathname, e
+            print('ERROR: Error opening %s\n%s', pathname, e)
             return None
 
     @staticmethod
@@ -215,7 +215,7 @@ class Utils(object):
         """Convert a file to a base64 encoded file.
 
         Args:
-          pathname: data to base64 encode
+          data: data to base64 encode
           jobtype: job type being encoded - pdf, jpg etc
         Returns:
           string, base64 encoded string.
@@ -227,7 +227,7 @@ class Utils(object):
         if jobtype in Utils._MIMETYPES_JOBTYPES:
             mimetype = Utils._MIMETYPES_JOBTYPES[jobtype]
         header = 'data:%s;base64,' % mimetype
-        return header + base64.b64encode(data)
+        return header + str(base64.b64encode(data), 'UTF-8')
 
     @staticmethod
     def GetLanguage(locale, cupshelper=None):
@@ -291,7 +291,7 @@ class Utils(object):
 
         if not OUT:
             logging.error("Cannot write temp file: %s", tempFile)
-            print "ERROR: Cannot write " + tempFile
+            print("ERROR: Cannot write " + tempFile)
             sys.exit(1)
 
         for line in stdin:

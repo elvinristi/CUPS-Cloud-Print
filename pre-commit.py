@@ -57,8 +57,8 @@ if __name__ == '__main__':  # pragma: no cover
                 stdout=subprocess.PIPE)
             pep8output = p2.communicate()[0].strip()
             if p2.returncode != 0:
-                print alteredfile, "failed pep8 check:"
-                print pep8output
+                print(alteredfile, "failed pep8 check:")
+                print(pep8output)
             testfile = open(alteredfile, "r")
             fileNeedsUpdating = False
             for line in testfile:

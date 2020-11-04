@@ -18,7 +18,6 @@ from ccputils import Utils
 
 import cups
 
-
 class CUPSHelper(object):
     def __init__(self, connection=None):
         if connection is None:
@@ -52,7 +51,7 @@ class CUPSHelper(object):
 
     def getPrinters(self):
         printers = self._connection.getPrinters()
-        return dict((name, printer) for (name, printer) in printers.iteritems()
+        return dict((name, printer) for (name, printer) in printers.items()
                     if printer['device-uri'].startswith(Utils.PROTOCOL))
 
     def deletePrinter(self, uri):
@@ -92,8 +91,8 @@ class CUPSHelper(object):
             error = e
 
         if error is not None:
-            print 'Error adding: %s' % name
-            print error
+            print('Error adding: %s' % name)
+            print(error)
             return False
 
         return True
