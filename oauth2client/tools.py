@@ -29,6 +29,7 @@ import socket
 import sys
 import webbrowser
 
+from pip._vendor.distlib.compat import raw_input
 from six.moves import BaseHTTPServer
 from six.moves import urllib
 

@@ -95,9 +95,9 @@ if __name__ == '__main__':  # pragma: no cover
         sys.exit(1)
 
     try:
-        print "Fetching list of available ppds..."
+        print("Fetching list of available ppds...")
         allppds = cupsHelper.getPPDs()
-        print "List retrieved successfully"
+        print("List retrieved successfully")
     except Exception as e:
         sys.stderr.write("Error connecting to CUPS: " + str(e) + "\n")
         sys.exit(1)
@@ -115,7 +115,7 @@ if __name__ == '__main__':  # pragma: no cover
                     updatingmessage = "Updating "
                     updatingmessage += cupsprinters[device]["printer-info"]
                     updatingmessage += " with new id uri format"
-                    print updatingmessage
+                    print(updatingmessage)
                     tempprinter = None
                     printerid, requestor = printer_manager.getPrinterIDByDetails(
                         account, printerid)
@@ -140,10 +140,10 @@ if __name__ == '__main__':  # pragma: no cover
                         errormessage += " not found, "
                         errormessage += "you should delete and "
                         errormessage += "re-add this printer"
-                        print errormessage
+                        print(errormessage)
                         continue
                 else:
-                    print "Updating " + cupsprinters[device]["printer-info"]
+                    print("Updating " + cupsprinters[device]["printer-info"])
 
                 ppdid = 'MFG:Google;DRV:GCP;CMD:POSTSCRIPT;DES:GoogleCloudPrint;MDL:' + \
                     cupsprinters[device]["device-uri"]
@@ -168,6 +168,6 @@ if __name__ == '__main__':  # pragma: no cover
                     errormessage = cupsprinters[device]["printer-info"]
                     errormessage += " not found, you should delete and"
                     errormessage += " re-add this printer"
-                    print errormessage
+                    print(errormessage)
         except Exception as e:
             sys.stderr.write("Error connecting to CUPS: " + str(e) + "\n")

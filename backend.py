@@ -76,22 +76,22 @@ if __name__ == '__main__':  # pragma: no cover
     printer_manager = PrinterManager(requestors)
 
     if len(sys.argv) == 1:
-        print 'network ' + Utils.PROTOCOL_NAME + ' "Unknown" "Google Cloud Print"'
+        print('network ' + Utils.PROTOCOL_NAME + ' "Unknown" "Google Cloud Print"')
 
         printers = printer_manager.getPrinters()
         if printers is not None:
             try:
                 for printer in printers:
-                    print printer.getCUPSBackendDescription()
+                    print(printer.getCUPSBackendDescription())
             except Exception as error:
                 sys.stderr.write("ERROR: " + error)
                 logging.error(error)
                 sys.exit(1)
         sys.exit(0)
 
-    filedata = ""
-    for line in sys.stdin:
-        filedata += line
+    filedata = sys.stdin.buffer.read()
+    # for line in sys.stdin:
+    #     filedata += line
 
     uri = os.getenv('DEVICE_URI')
     cupsprintername = os.getenv('PRINTER')

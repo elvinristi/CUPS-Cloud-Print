@@ -47,15 +47,15 @@ if __name__ == '__main__':  # pragma: no cover
     printer_manager = PrinterManager(requestors)
     printers = printer_manager.getPrinters()
     if printers is None:
-        print "ERROR: No Printers Found"
+        print("ERROR: No Printers Found")
         sys.exit(1)
 
     for printer in printers:
-        print printer.getCUPSDriverDescription()
-        print ""
-        print printer.getFields()
-        print printer['capabilities']
-        print "\n"
+        print(printer.getCUPSDriverDescription())
+        print("")
+        print(printer.getFields())
+        print(printer['capabilities'])
+        print("\n")
         ppdname = printer.getPPDName()
         p1 = subprocess.Popen(
             (os.path.join(libpath, 'dynamicppd.py'), 'cat', ppdname.lstrip('-')),
@@ -64,9 +64,9 @@ if __name__ == '__main__':  # pragma: no cover
         p = subprocess.Popen(['cupstestppd', '-'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         testdata = p.communicate(ppddata)[0]
         result = p.returncode
-        print "Result of cupstestppd was " + str(result)
-        print "".join(testdata)
+        print("Result of cupstestppd was " + str(result))
+        print("".join(testdata))
         if result != 0:
-            print "cupstestppd errored: "
-            print ppddata
-            print "\n"
+            print("cupstestppd errored: ")
+            print(ppddata)
+            print("\n")

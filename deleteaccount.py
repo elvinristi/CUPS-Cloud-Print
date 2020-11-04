@@ -23,6 +23,7 @@ exit $?
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from pip._vendor.distlib.compat import raw_input
 
 if __name__ == '__main__':  # pragma: no cover
     import sys
@@ -46,22 +47,22 @@ if __name__ == '__main__':  # pragma: no cover
     while True:
         result, storage = Auth.SetupAuth(False)
         if not result:
-            print "No accounts are currently setup"
+            print("No accounts are currently setup")
             break
         else:
             requestors = result
-            print "You currently have these accounts configured: "
+            print("You currently have these accounts configured: ")
             i = 0
             accounts = []
             for requestor in requestors:
                 i += 1
                 accounts.append(requestor.getAccount())
-                print str(i) + ") " + requestor.getAccount()
-            print "0) Exit"
+                print(str(i) + ") " + requestor.getAccount())
+            print("0) Exit")
             answer = raw_input("Which account to delete (1-" + str(i) + ") ? ")
             if (answer.isdigit() and int(answer) <= i and int(answer) >= 1):
                 if (Auth.DeleteAccount(accounts[int(answer) - 1]) is None):
-                    print accounts[int(answer) - 1] + " deleted."
+                    print(accounts[int(answer) - 1] + " deleted.")
                     deleteprintersanswer = raw_input(
                         "Also delete associated printers? ")
                     if deleteprintersanswer.lower().startswith("y"):
@@ -69,24 +70,24 @@ if __name__ == '__main__':  # pragma: no cover
                         printers = \
                             printer_manager.getCUPSPrintersForAccount(accounts[int(answer) - 1])
                         if len(printers) == 0:
-                            print "No printers to delete"
+                            print("No printers to delete")
                         else:
                             for cupsPrinter in printers:
-                                print "Deleting " + cupsPrinter['printer-info']
+                                print("Deleting " + cupsPrinter['printer-info'])
                                 deleteReturnValue = cupsHelper.deletePrinter(
                                     cupsPrinter['printer-info'])
                                 if deleteReturnValue is not None:
                                     errormessage = "Error deleting printer: "
                                     errormessage += str(deleteReturnValue)
-                                    print errormessage
+                                    print(errormessage)
                     else:
-                        print "Not deleting associated printers"
+                        print("Not deleting associated printers")
                 else:
                     errormessage = "Error deleting stored "
                     errormessage += "credentials, perhaps "
                     errormessage += Auth.config + " is not writable?"
-                    print errormessage
+                    print(errormessage)
             elif (answer == "0"):
                 break
             else:
-                print "Invalid response, use '0' to exit"
+                print("Invalid response, use '0' to exit")

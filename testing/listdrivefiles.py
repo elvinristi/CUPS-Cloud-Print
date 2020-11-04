@@ -31,7 +31,7 @@ def getDriveFiles(requestors):
         responseobj = requestor.doRequest(
             'files', endpointurl="https://www.googleapis.com/drive/v2")
         if 'error' in responseobj:
-            print "Errored fetching files from drive"
+            print("Errored fetching files from drive")
         else:
             for item in responseobj['items']:
                 returnValue.append(item)
@@ -57,12 +57,12 @@ if __name__ == '__main__':  # pragma: no cover
                                     'https://www.googleapis.com/auth/drive.readonly'])
     files = getDriveFiles(requestors)
     if files is None:
-        print "No Files Found"
+        print("No Files Found")
         sys.exit(1)
 
     for drivefile in files:
         if len(sys.argv) == 2 and drivefile['title'] == sys.argv[1] + '.pdf':
-            print drivefile['fileSize']
+            print(drivefile['fileSize'])
             sys.exit(0)
         elif len(sys.argv) != 2:
-            print drivefile['title']
+            print(drivefile['title'])

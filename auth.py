@@ -19,6 +19,8 @@ import os
 import sys
 import subprocess
 # workaround for ubuntu 12.04 / older python-six version
+from pip._vendor.distlib.compat import raw_input
+
 try:
     from six.moves import urllib
 except ImportError:
@@ -37,8 +39,9 @@ from oauth2client.client import AccessTokenRefreshError
 
 
 class Auth(object):
-    clientid = "843805314553.apps.googleusercontent.com"
-    clientsecret = 'MzTBsY4xlrD_lxkmwFbBrvBv'
+    # Use google/cloud-print-connector own clientid/clientsecret
+    clientid = "539833558011-35iq8btpgas80nrs3o7mv99hm95d4dv6.apps.googleusercontent.com"
+    clientsecret = 'V9BfPOvdiYuw12hDx5Y5nR0a'
     config = '/etc/cloudprint.conf'
     normal_permissions = 'https://www.googleapis.com/auth/cloudprint'
     http_thread = None
@@ -89,9 +92,9 @@ class Auth(object):
 
     @staticmethod
     def SetupHttpReturnServer():
-        import BaseHTTPServer
+        import http.server as BaseHTTPServer
         import random
-        import SocketServer
+        import socketserver as SocketServer
         from threading import Thread
         handler = BaseHTTPServer.BaseHTTPRequestHandler
 
@@ -153,11 +156,11 @@ class Auth(object):
             message += "( for the " + userid + " account ), "
             message += "then provide the code displayed : \n\n"
             message += auth_uri + "\n"
-            print message
+            print(message)
             Utils.openBrowserWithUrl(auth_uri)
             if url is not None:
                 from select import select
-                print 'Code from Google: '
+                print('Code from Google: ')
                 while (Auth.code is None):
                     result, _, _ = select([sys.stdin], [], [], 0.5)
                     if result and Auth.code is None:
@@ -174,7 +177,7 @@ class Auth(object):
             except Exception as e:
                 message = "\nThe code does not seem to be valid ( "
                 message += str(e) + " ), please try again.\n"
-                print message
+                print(message)
 
     @staticmethod
     def AddAccountStep1(userid, permissions=None, redirect_uri=None):

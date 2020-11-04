@@ -17,9 +17,10 @@ import hashlib
 import json
 import locale
 import logging
-import mimetools
+import binascii
+import os
 import re
-import urllib
+import urllib.parse
 import subprocess
 import unicodedata
 import sys
@@ -183,7 +184,7 @@ class Printer(object):
 
     def _getMimeBoundary(self):
         if not hasattr(self, '_mime_boundary'):
-            self._mime_boundary = mimetools.choose_boundary()
+            self._mime_boundary = binascii.hexlify(os.urandom(16)).decode('ascii')
         return self._mime_boundary
 
     def __getitem__(self, key):
@@ -208,13 +209,13 @@ class Printer(object):
         Returns:
           URI for the printer
         """
-        account = urllib.quote(self.getAccount().encode('ascii', 'replace'))
-        printer_id = urllib.quote(self['id'].encode('ascii', 'replace'))
+        account = urllib.parse.quote(self.getAccount().encode('ascii', 'replace'))
+        printer_id = urllib.parse.quote(self['id'].encode('ascii', 'replace'))
         return "%s%s/%s" % (Utils.PROTOCOL, account, printer_id)
 
     def getListDescription(self):
         return '%s - %s - %s' % (
-            self.getDisplayName().encode('ascii', 'replace'), self.getURI(), self.getAccount())
+            str(self.getDisplayName().encode('ascii', 'replace'), 'UTF-8'), self.getURI(), self.getAccount())
 
     def getLocation(self):
         """Gets the location of the printer, or '' if location not available."""
@@ -242,7 +243,8 @@ class Printer(object):
                 self.getURI(), display_name, display_name, self.getIEEE1284())
 
     def getCUPSDriverDescription(self):
-        name = self.getDisplayName().encode('ascii', 'replace')
+        name = str(self.getDisplayName().encode('ascii', 'replace'), 'UTF-8')
+
         return self._DRIVER_DESCRIPTION % (
             self.getPPDName(), name, self.getAccount(), self.getIEEE1284())
 
@@ -265,8 +267,8 @@ class Printer(object):
 
     def getPPDName(self):
         return self._PPD_NAME % (
-            urllib.quote(self.getAccount().encode('ascii', 'replace').replace(' ', '-')),
-            self['id'].encode('ascii', 'replace').replace(' ', '-'))
+            urllib.parse.quote(str(self.getAccount().encode('ascii', 'replace'), 'UTF-8').replace(' ', '-')),
+            str(self['id'].encode('ascii', 'replace'), 'UTF-8').replace(' ', '-'))
 
     def generatePPD(self):
         """Generates a PPD string for this printer."""
@@ -557,6 +559,7 @@ class Printer(object):
             ('capabilities', json.dumps(self._getCapabilities(cupsprintername, options)))
         ]
         logging.info('Capability headers are: %s', headers[4])
+        # logging.info('Request body: %s', json.dumps(headers))
         data = self._encodeMultiPart(headers)
 
         try:
@@ -570,4 +573,5 @@ class Printer(object):
 
         except Exception as error_msg:
             sys.stderr.write("ERROR: Print job %s failed with %s\n" % (jobtype, error_msg))
+            raise error_msg
             return False
