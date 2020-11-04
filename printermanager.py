@@ -13,7 +13,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import email.generator
+import binascii
+import os
 import re
 from auth import Auth
 from urllib.parse import urlparse,unquote
@@ -23,7 +24,7 @@ from ccputils import Utils
 
 
 class PrinterManager(object):
-    BOUNDARY = email.generator._make_boundary()
+    BOUNDARY = binascii.hexlify(os.urandom(16)).decode('ascii')
     CRLF = '\r\n'
     requestors = None
     cachedPrinterDetails = {}
